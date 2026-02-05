@@ -10,6 +10,7 @@ import {InputTextModule} from 'primeng/inputtext';
   ],
   templateUrl: './accueil.html',
   styleUrl: './accueil.scss',
+  standalone: true
 })
 export class Accueil {
   value: string | undefined;
