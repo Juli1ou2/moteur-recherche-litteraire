@@ -1,6 +1,10 @@
 package com.back.back.services;
 
+import com.back.back.entities.Book;
+import com.back.back.entities.IndexInverse;
 import com.back.back.entities.Stem;
+import com.back.back.repositories.BookRepository;
+import com.back.back.repositories.IndexInverseRepository;
 import com.back.back.repositories.StemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ public class StemBuildingService {
     private final TextFilesReaderService textFilesReader;
     private final TextProcessingService textProcessing;
     private final StemRepository stemRepository;
+    private final BookRepository bookRepository;
+    private final IndexInverseRepository indexInverseRepository;
 
     public void buildStems(Path textFilesPath) throws IOException {
         Map<String, Integer> documentFrequency = new ConcurrentHashMap<>();
@@ -35,6 +41,8 @@ public class StemBuildingService {
         AtomicInteger fileCount = new AtomicInteger(1);
 
         for (Path file : files) {
+            Book book = new Book(file.getFileName().toString());
+            bookRepository.save(book);
             executor.submit(() -> {
                 try {
                     Set<String> uniqueStemsInFile = new HashSet<>();
@@ -49,6 +57,7 @@ public class StemBuildingService {
 
                     for (String stem : uniqueStemsInFile) {
                         documentFrequency.merge(stem, 1, Integer::sum);
+                        indexInverseRepository.save(new IndexInverse(stem, book, documentFrequency.get(stem)));
                     }
 
                     System.out.println(fileCount.getAndIncrement() + " : traitement terminé : "
