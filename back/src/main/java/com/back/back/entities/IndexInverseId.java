@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class IndexInverseId implements Serializable {
 
     @Column(name = "stem_id")
-    private Integer stemId;
+    private Long stemId;
 
     @Column(name = "book_id")
     private Long bookId;

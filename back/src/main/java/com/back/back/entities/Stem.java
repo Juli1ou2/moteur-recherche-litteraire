@@ -18,4 +18,22 @@ public class Stem {
 
     @Column(nullable = false)
     private int frequency;
+
+    public Stem() {
+    }
+
+    public Stem(Long id, String stem, int frequency) {
+        this.id = id;
+        this.stem = stem;
+        this.frequency = frequency;
+    }
+
+    @Override
+    public String toString() {
+        return "Stem{" +
+                "id=" + id +
+                ", stem='" + stem + '\'' +
+                ", frequency=" + frequency +
+                '}';
+    }
 }
