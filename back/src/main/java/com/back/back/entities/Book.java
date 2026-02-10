@@ -9,32 +9,30 @@ import lombok.Setter;
 @Entity
 @Table(name = "book")
 public class Book {
-
-    // Getters et Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String nom;
+    private String titre;
 
-    @Column(nullable = false, unique = true)
-    private String author;
+    @Column(nullable = false)
+    private String auteur;
 
-    @Column(nullable = true)
+    @Column
     private int nbPages;
 
     // Constructeurs
     public Book() {}
 
-    public Book(String nom, String author, int nbPages) {
-        this.nom = nom;
-        this.author = author;
+    public Book(String titre, String auteur, int nbPages) {
+        this.titre = titre;
+        this.auteur = auteur;
         this.nbPages = nbPages;
     }
 
     @Override
     public String toString() {
-        return "Book{id=" + id + ", nom='" + nom + "', author='" + author + ", nbPages='" + nbPages + "'}";
+        return "Book{id=" + id + ", titre='" + titre + "', auteur='" + auteur + ", nbPages='" + nbPages + "'}";
     }
 }
