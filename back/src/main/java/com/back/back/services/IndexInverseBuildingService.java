@@ -76,7 +76,7 @@ public class IndexInverseBuildingService {
 
                     indexInverseRepository.saveAll(batch);
                     System.out.println(
-                            "✔ Index inverse : " + book.getTitre()
+                            "✅ Index inverse : " + book.getTitre()
                                     + " | entrées : " + batch.size()
                     );
 

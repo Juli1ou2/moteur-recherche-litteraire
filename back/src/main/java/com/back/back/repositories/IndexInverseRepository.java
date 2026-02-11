@@ -17,4 +17,13 @@ public interface IndexInverseRepository extends JpaRepository<IndexInverse, Inde
                 ORDER BY SUM(ii.termFrequency) DESC
             """)
     List<Object[]> findByStemIds(@Param("stemIds") List<Integer> stemIds);
+
+    @Query("""
+                SELECT ii.book.id
+                FROM IndexInverse ii
+                WHERE ii.stem.id = :stemId
+                ORDER by ii.termFrequency DESC
+                LIMIT 1
+            """)
+    Long getBookIdByStem(@Param("stemId") Long stemId);
 }
