@@ -18,5 +18,4 @@ public class SearchController {
         String var = body.get("regex");
         return "Hello World !";
     }
-
 }
