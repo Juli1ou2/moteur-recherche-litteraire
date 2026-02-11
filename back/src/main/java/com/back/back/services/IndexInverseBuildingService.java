@@ -1,5 +1,7 @@
 package com.back.back.services;
 
+import com.back.back.entities.Book;
+import com.back.back.entities.IndexInverse;
 import com.back.back.entities.Stem;
 import com.back.back.repositories.BookRepository;
 import com.back.back.repositories.IndexInverseRepository;
@@ -11,17 +13,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class StemBuildingService {
+public class IndexInverseBuildingService {
 
     private final TextProcessingService textProcessing;
     private final TextFilesReaderService textFilesReader;
@@ -29,21 +32,30 @@ public class StemBuildingService {
     private final BookRepository bookRepository;
     private final IndexInverseRepository indexInverseRepository;
 
-    public void buildStems(Path textFilesPath) throws IOException {
-        Map<String, Integer> documentFrequency = new ConcurrentHashMap<>();
-//        Map<String, Stem> stemCache = new ConcurrentHashMap<>();
-//        AtomicInteger counter = new AtomicInteger(1);
+    public void buildIndexInverse(Path textFilesPath) throws IOException {
+        Map<String, Stem> stemCache = stemRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(Stem::getStem, s -> s));
+
+        if (stemCache.isEmpty()) {
+            throw new IllegalStateException(
+                    "Aucun stem en base !");
+        }
 
         List<Path> files = textFilesReader.listTextFiles(textFilesPath);
-        System.out.println("Nombre de fichiers : " + files.size());
-
+        System.out.println("📚 Index inverse — fichiers : " + files.size());
         ExecutorService executor = Executors.newFixedThreadPool(4);
-
         for (Path file : files) {
             executor.submit(() -> {
                 try {
-                    Map<String, Integer> termFrequencies = new HashMap<>();
+                    Book book = bookRepository.findByTitre(file.getFileName().toString())
+                            .orElseGet(() ->
+                                    bookRepository.save(
+                                            new Book(file.getFileName().toString())
+                                    )
+                            );
 
+                    Map<String, Integer> termFrequencies = new HashMap<>();
                     try (BufferedReader reader = Files.newBufferedReader(file)) {
                         String line;
                         while ((line = reader.readLine()) != null) {
@@ -53,11 +65,23 @@ public class StemBuildingService {
                         }
                     }
 
-                    for (String stem : termFrequencies.keySet()) {
-                        documentFrequency.merge(stem, 1, Integer::sum);
+                    List<IndexInverse> batch = new ArrayList<>();
+                    for (Map.Entry<String, Integer> entry : termFrequencies.entrySet()) {
+                        Stem stem = stemCache.get(entry.getKey());
+                        if (stem != null) {
+                            IndexInverse indexInverse = new IndexInverse(stem, book, entry.getValue());
+                            batch.add(indexInverse);
+                        }
                     }
+
+                    indexInverseRepository.saveAll(batch);
+                    System.out.println(
+                            "✔ Index inverse : " + book.getTitre()
+                                    + " | entrées : " + batch.size()
+                    );
+
                 } catch (Exception e) {
-                    System.err.println("Erreur fichier " + file.getFileName());
+                    System.err.println("❌ Erreur fichier : " + file.getFileName());
                     e.printStackTrace();
                 }
             });
@@ -70,20 +94,6 @@ public class StemBuildingService {
             Thread.currentThread().interrupt();
         }
 
-        List<Stem> topStems = documentFrequency.entrySet()
-                .stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(10_000)
-                .map(e -> {
-                    Stem s = new Stem();
-                    s.setStem(e.getKey());
-                    s.setFrequency(e.getValue());
-                    return s;
-                })
-                .toList();
-
-        stemRepository.saveAll(topStems);
-
-        System.out.println("✅ " + topStems.size() + " stem créés !");
+        System.out.println("✅ Index inverse terminé !");
     }
 }

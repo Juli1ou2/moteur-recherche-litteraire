@@ -1,5 +1,6 @@
 package com.back.back;
 
+import com.back.back.services.IndexInverseBuildingService;
 import com.back.back.services.StemBuildingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 public class IndexingRunner implements CommandLineRunner {
     private final StemBuildingService stemBuildingService;
+    private final IndexInverseBuildingService indexInverseBuildingService;
 
     @Value("${gutenberg.stemming.indexing}")
     private boolean enabled;
@@ -30,6 +32,7 @@ public class IndexingRunner implements CommandLineRunner {
 
         if (enabled) {
             stemBuildingService.buildStems(textFilesPath);
+            indexInverseBuildingService.buildIndexInverse(textFilesPath);
         }
     }
 }
