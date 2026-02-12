@@ -10,6 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Component
 @RequiredArgsConstructor
@@ -27,8 +28,8 @@ public class IndexingRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Path textFilesPath = resource.getFile().toPath();
-//        Path textFilesPath = Paths.get(path);
+//        Path textFilesPath = resource.getFile().toPath();
+        Path textFilesPath = Paths.get(path);
 
         if (enabled) {
             stemBuildingService.buildStems(textFilesPath);

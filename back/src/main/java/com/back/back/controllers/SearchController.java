@@ -1,10 +1,12 @@
 package com.back.back.controllers;
 
+import com.back.back.dtos.GutendexBookDto;
 import com.back.back.entities.Book;
 import com.back.back.entities.Stem;
 import com.back.back.repositories.BookRepository;
 import com.back.back.repositories.IndexInverseRepository;
 import com.back.back.repositories.StemRepository;
+import com.back.back.services.GutendexService;
 import com.back.back.services.ScoringService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,6 +27,7 @@ public class SearchController {
     private final BookRepository bookRepository;
     private final IndexInverseRepository indexInverseRepository;
     private final ScoringService scoringService;
+    private final GutendexService gutendexService;
 
     @GetMapping("/search")
     public String index() {
@@ -38,14 +43,34 @@ public class SearchController {
         return scoringService.getStemFromSearch(stems, word, maxResult);
     }
 
-    @GetMapping("/search/book")
-    public String searchBookFromStem(@RequestParam("word") String word) {
+    @GetMapping("/search/books")
+    public List<Book> searchBooksFromStem(@RequestParam("word") String word) {
         List<Stem> stems = stemRepository.findAll();
         Map<String, Object> stemResult = scoringService.getStemFromSearch(stems, word, 1).getFirst();
 
-        Long idSearchedBook = indexInverseRepository.getBookIdByStem((Long) stemResult.get("stemId"));
-        Book searchedBook = bookRepository.findById(idSearchedBook).orElse(new Book());
+        List<Long> idSearchedBooks = indexInverseRepository.getBookIdByStem((Long) stemResult.get("stemId"));
+        return bookRepository.findAllById(idSearchedBooks).stream().toList().subList(0, 9);
+    }
 
-        return searchedBook.getTitre();
+    @GetMapping("/search/books/gutendex")
+    public Optional<GutendexBookDto> searchBooksFromStemAndGutenberg(@RequestParam("word") String word) {
+        List<Stem> stems = stemRepository.findAll();
+        Map<String, Object> stemResult = scoringService.getStemFromSearch(stems, word, 1).getFirst();
+
+        List<Long> idSearchedBooks = indexInverseRepository.getBookIdByStem((Long) stemResult.get("stemId"));
+        List<Book> books = bookRepository
+                .findAllById(idSearchedBooks)
+                .stream()
+                .limit(9)
+                .toList();
+
+        String booksIds = books.stream()
+                .map(Book::getTitre)
+                .map(titre -> titre.endsWith(".txt")
+                        ? titre.substring(0, titre.length() - 4)
+                        : titre)
+                .collect(Collectors.joining(","));
+
+        return gutendexService.getBooksMetadataFromIds(booksIds);
     }
 }

@@ -23,7 +23,6 @@ public interface IndexInverseRepository extends JpaRepository<IndexInverse, Inde
                 FROM IndexInverse ii
                 WHERE ii.stem.id = :stemId
                 ORDER by ii.termFrequency DESC
-                LIMIT 1
             """)
-    Long getBookIdByStem(@Param("stemId") Long stemId);
+    List<Long> getBookIdByStem(@Param("stemId") Long stemId);
 }
