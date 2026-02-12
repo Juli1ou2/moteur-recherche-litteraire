@@ -1,12 +1,12 @@
-import {GutendexPersonDto} from './gutendex-person.model';
+import {GutendexPerson} from './gutendex-person.model';
 
-export interface GutendexBookDto {
+export interface GutendexBook {
   id: number;
   title: string;
   subjects: string[];
-  authors: GutendexPersonDto[];
+  authors: GutendexPerson[];
   summaries: string[];
-  translators: GutendexPersonDto[];
+  translators: GutendexPerson[];
   bookshelves: string[];
   languages: string[];
   copyright: boolean | null;
