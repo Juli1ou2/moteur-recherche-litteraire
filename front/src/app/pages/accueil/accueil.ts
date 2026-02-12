@@ -6,11 +6,12 @@ import {BooksService} from '../../core/services/books.service';
 import {GutendexBook} from '../../core/models/gutenberg-book.model';
 import {CardModule} from 'primeng/card';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-accueil',
   imports: [
-    ButtonModule, InputTextModule, FormsModule, CardModule, ProgressSpinnerModule
+    ButtonModule, InputTextModule, FormsModule, CardModule, ProgressSpinnerModule, RouterLink
   ],
   templateUrl: './accueil.html',
   styleUrl: './accueil.scss',
@@ -37,12 +38,12 @@ export class Accueil implements OnInit {
     this.loading = true;
     this.booksService.getBooksFromSearch(searchValue).subscribe({
       next: (data) => {
-        console.log('Résultats pour ', searchValue, ': ', data);
+        console.log('Résultats pour', searchValue, ': ', data);
         this.searchedBooks = data;
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur:', err);
+        console.error('Erreur :', err);
         this.loading = false;
       }
     });

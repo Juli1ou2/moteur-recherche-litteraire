@@ -4,5 +4,5 @@ import {BookDetail} from './pages/book-detail/book-detail';
 
 export const routes: Routes = [
   {path: "", component: Accueil, title: "Shajudan Search"},
-  {path: "book-detail", component: BookDetail, title: "Book detail Gutendex"}
+  {path: "book-details/:id", component: BookDetail, title: "Book detail Gutendex"}
 ];

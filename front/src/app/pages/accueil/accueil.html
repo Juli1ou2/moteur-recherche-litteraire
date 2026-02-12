@@ -14,7 +14,7 @@
     @if (searchedBooks.length > 0) {
       <div class="w-xl flex flex-col gap-4 overflow-auto">
         @for (book of searchedBooks; track book.id) {
-          <p-card header="{{book.title}}">
+          <p-card header="{{book.title}}" [routerLink]="['book-details/', book.id]">
             @if (book.authors.length > 0) {
               <p class="m-0 text-emerald-600">{{ book.authors[0].name }}</p>
             } @else {

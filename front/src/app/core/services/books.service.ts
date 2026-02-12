@@ -16,6 +16,10 @@ export class BooksService {
     return this.http.get<GutendexBook[]>(API_URL + 'search/books/gutendex?word=' + word);
   }
 
+  getGutendexBookFromId(id: string): Observable<GutendexBook> {
+    return this.http.get<GutendexBook>(GUTENDEX_API_URL + 'books/' + id);
+  }
+
   getBooksFromGutendexTest(id: number): Observable<GutendexBook[]> {
     return this.http.get<GutendexBook[]>(GUTENDEX_API_URL + 'books?ids=' + id);
   }
