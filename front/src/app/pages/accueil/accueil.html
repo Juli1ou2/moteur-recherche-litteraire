@@ -1,5 +1,29 @@
-<h1 class="w-96 text-4xl mb-4 text-sky-600">Shajudan Search</h1>
-<div class="card flex items-center gap-4 w-96 mb-32">
-  <input pInputText [(ngModel)]="value" type="text" placeholder="Search..." fluid/>
-  <p-button label="Search" icon="pi pi-search" iconPos="left" severity="info"/>
+<div class="p-8">
+  <h1 class="w-96 text-4xl mb-4 text-sky-600">Shajudan Search</h1>
+  <div class="card flex items-center gap-4 w-96 mb-12">
+    <input pInputText [(ngModel)]="value" type="text" placeholder="Search..." fluid/>
+    <p-button label="Search" icon="pi pi-search" iconPos="left" severity="info" (onClick)="onSearch()"/>
+  </div>
+  @if (loading) {
+    <div class="w-xl">
+      <div class="card flex justify-center">
+        <p-progress-spinner ariaLabel="loading"/>
+      </div>
+    </div>
+  } @else {
+    @if (searchedBooks.length > 0) {
+      <div class="w-xl flex flex-col gap-4 overflow-auto">
+        @for (book of searchedBooks; track book.id) {
+          <p-card header="{{book.title}}" [routerLink]="['book-details/', book.id]">
+            @if (book.authors.length > 0) {
+              <p class="m-0 text-emerald-600">{{ book.authors[0].name }}</p>
+            } @else {
+              <p class="m-0 text-emerald-600">Auteur inconnu</p>
+            }
+          </p-card>
+        }</div>
+    } @else {
+      <p class="w-xl">Recherchez sur le catalogue Gutenberg avec Shajudan Search !</p>
+    }
+  }
 </div>

@@ -61,7 +61,7 @@ public class SearchController {
         List<Book> books = bookRepository
                 .findAllById(idSearchedBooks)
                 .stream()
-                .limit(9)
+                .limit(10)
                 .toList();
 
         String booksIds = books.stream()
@@ -71,6 +71,7 @@ public class SearchController {
                         : titre.substring(0, titre.length() - 4))
                 .collect(Collectors.joining(","));
 
+        System.out.println("IDs : " + booksIds);
         return gutendexService.getBooksMetadataFromIds(booksIds);
     }
 }

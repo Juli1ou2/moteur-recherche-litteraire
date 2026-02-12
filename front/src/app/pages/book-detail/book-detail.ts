@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {GutendexBookDto} from '../../core/models/gutenberg-book.model';
+import {Component, inject, signal} from '@angular/core';
+import {GutendexBook} from '../../core/models/gutenberg-book.model';
 import {Card} from 'primeng/card';
 import {Button, ButtonDirective} from 'primeng/button';
 import {Tag} from 'primeng/tag';
@@ -7,8 +7,9 @@ import {Badge} from 'primeng/badge';
 import {Divider} from 'primeng/divider';
 import {Image} from 'primeng/image';
 import {ScrollPanel} from 'primeng/scrollpanel';
-import {RouterModule} from '@angular/router';
+import {ActivatedRoute, RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
+import {BooksService} from '../../core/services/books.service';
 
 @Component({
   selector: 'app-book-detail',
@@ -28,57 +29,29 @@ import {CommonModule} from '@angular/common';
   styleUrl: './book-detail.scss',
 })
 
-export class BookDetail implements OnInit{
+export class BookDetail {
+  book!: GutendexBook;
+  bookId = signal('');
+  private activatedRoute = inject(ActivatedRoute);
+  private booksService: BooksService = inject(BooksService);
 
-  gutendexBookDto!: GutendexBookDto;
-
-
-  oneObject = {
-    count: 1,
-    next: null,
-    previous: null,
-    results: [
-      {
-        id: 9902,
-        title: "The Middle of Things",
-        authors: [
-          {
-            name: "Fletcher, J. S. (Joseph Smith)",
-            birth_year: 1863,
-            death_year: 1935
-          }
-        ],
-        summaries: [
-          "blableblabekla",
-          "nladnkffc"
-        ],
-        editors: [],
-        translators: [],
-        subjects: ["Detective and mystery stories"],
-        bookshelves: [
-          "Category: British Literature",
-          "Category: Crime, Thrillers and Mystery",
-          "Category: Novels",
-          "Detective Fiction"
-        ],
-        languages: ["en"],
-        copyright: false,
-        media_type: "Text",
-        formats: {
-          "image/jpeg": "https://www.gutenberg.org/cache/epub/9902/pg9902.cover.medium.jpg"
+  constructor() {
+    this.activatedRoute.params.subscribe((params) => {
+      console.log("Searching...");
+      this.bookId.set(params['id']);
+      this.booksService.getGutendexBookFromId(this.bookId()).subscribe({
+        next: (data) => {
+          console.log('Book :', data);
+          this.book = data;
         },
-        download_count: 289
-      }
-    ]
-  };
-
-  ngOnInit(): void {
-    this.gutendexBookDto = this.oneObject.results[0];
+        error: (err) => {
+          console.error('Erreur:', err);
+        }
+      });
+    });
   }
 
   get coverImageUrl(): string {
-    return this.gutendexBookDto?.formats['image/jpeg'] ?? '';
+    return this.book?.formats['image/jpeg'] ?? '';
   }
-
-
 }
