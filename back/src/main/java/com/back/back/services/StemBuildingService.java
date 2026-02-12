@@ -9,8 +9,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +49,7 @@ public class StemBuildingService {
                 try {
                     Map<String, Integer> termFrequencies = new HashMap<>();
 
-                    try (BufferedReader reader = Files.newBufferedReader(file)) {
+                    try (BufferedReader reader = createSafeReader(file)) {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             for (String stem : textProcessing.extractStems(line)) {
@@ -70,20 +75,36 @@ public class StemBuildingService {
             Thread.currentThread().interrupt();
         }
 
-        List<Stem> topStems = documentFrequency.entrySet()
-                .stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(10_000)
-                .map(e -> {
-                    Stem s = new Stem();
-                    s.setStem(e.getKey());
-                    s.setFrequency(e.getValue());
-                    return s;
-                })
-                .toList();
-
+        List<Stem> topStems = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : documentFrequency.entrySet()) {
+            String stemValue = entry.getKey();
+            int freq = entry.getValue();
+            stemRepository.findByStem(stemValue)
+                    .ifPresentOrElse(existing -> {
+                        existing.setFrequency(freq);
+                        topStems.add(existing);
+                    }, () -> {
+                        Stem s = new Stem();
+                        s.setStem(stemValue);
+                        s.setFrequency(freq);
+                        topStems.add(s);
+                    });
+        }
         stemRepository.saveAll(topStems);
 
+
         System.out.println("✅ " + topStems.size() + " stem créés !");
+    }
+
+    private BufferedReader createSafeReader(Path file) throws IOException {
+
+        CharsetDecoder decoder = StandardCharsets.UTF_8
+                .newDecoder()
+                .onMalformedInput(CodingErrorAction.IGNORE)
+                .onUnmappableCharacter(CodingErrorAction.IGNORE);
+
+        return new BufferedReader(
+                new InputStreamReader(
+                        Files.newInputStream(file), decoder));
     }
 }
