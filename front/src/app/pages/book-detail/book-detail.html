@@ -1,0 +1,124 @@
+<div class="detail-page">
+  @if (gutendexBookDto; as book) {
+    <button
+      pButton
+      type="button"
+      label="Retour"
+      icon="pi pi-arrow-left"
+      class="back-button-fixed"
+      [routerLink]="['/']">
+    </button>
+
+    <div class="detail-container">
+      <p-card styleClass="book-card">
+        <ng-template #header>
+          <div class="cover-wrap">
+            <p-image
+              [src]="coverImageUrl"
+              alt="Couverture du livre"
+              width="250"
+              [preview]="true">
+            </p-image>
+            <div class="meta-tags">
+              <p-tag [value]="book.media_type" severity="secondary"></p-tag>
+              @if (book.copyright) {
+                <p-tag value="Sous copyright" severity="warn"></p-tag>
+              } @else {
+                <p-tag value="Domaine public" severity="success"></p-tag>
+              }
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template #title>
+          <div class="title-block">
+            <h1>{{ book.title }}</h1>
+            <div class="subjects">
+              @for (subject of book.subjects; track subject) {
+                <p-tag [value]="subject" severity="info" [rounded]="true"></p-tag>
+              }
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template #subtitle>
+          <div class="content-section">
+            <p-divider align="left">
+              <span>Auteurs</span>
+            </p-divider>
+
+            <div class="author-list">
+              @for (author of book.authors; track author.name) {
+                <div class="author-item">
+                  <strong>{{ author.name }}</strong>
+                  <span>
+                    ({{ author.birth_year }}@if (author.death_year) { - {{ author.death_year }} })
+                  </span>
+                </div>
+              }
+            </div>
+
+            @if (book.translators.length > 0) {
+              <p-divider align="left">
+                <span>Traducteurs</span>
+              </p-divider>
+              <div class="translator-list">
+                @for (translator of book.translators; track translator.name) {
+                  <div>{{ translator.name }}</div>
+                }
+              </div>
+            }
+
+            <p-divider align="left">
+              <span>Langues</span>
+            </p-divider>
+            <div class="language-list">
+              @for (lang of book.languages; track lang) {
+                <p-tag [value]="lang.toUpperCase()" severity="contrast"></p-tag>
+              }
+            </div>
+          </div>
+        </ng-template>
+
+        @if (book.summaries.length > 0) {
+          <div class="summary">
+            <p-divider align="left">
+              <span>Resume</span>
+            </p-divider>
+            <p-scrollPanel [style]="{ width: '100%', height: '150px' }">
+              @for (summary of book.summaries; track summary) {
+                <p>{{ summary }}</p>
+              }
+            </p-scrollPanel>
+          </div>
+        }
+
+        <ng-template #footer>
+          <div class="footer-content">
+            <div class="bookshelves">
+              @for (bookshelf of book.bookshelves; track bookshelf) {
+                <p-tag [value]="bookshelf.replace('Category: ', '')" severity="secondary" [rounded]="true"></p-tag>
+              }
+            </div>
+
+            @if (book.formats['text/html']) {
+              <a [href]="book.formats['text/html']" target="_blank" class="read-link">
+                <p-button label="Lire en ligne" icon="pi pi-external-link" styleClass="w-full"></p-button>
+              </a>
+            }
+
+            <p-divider></p-divider>
+
+            <div class="stats">
+              <span>ID: {{ book.id }}</span>
+              <div>
+                <p-badge [value]="book.download_count.toString()" severity="info"></p-badge>
+                <span>Telechargements</span>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+  }
+</div>
