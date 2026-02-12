@@ -18,6 +18,9 @@ export class Accueil implements OnInit {
   private booksService: BooksService = inject(BooksService);
 
   ngOnInit(): void {
+    // this.booksService.getBooksFromGutendexTest(9902).subscribe((books) => {
+    //   console.log(books)
+    // });
     this.booksService.getBooksFromSearch("dead").subscribe((books) => {
       console.log(books)
     });

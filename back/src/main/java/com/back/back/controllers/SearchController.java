@@ -53,7 +53,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/books/gutendex")
-    public Optional<GutendexBookDto> searchBooksFromStemAndGutenberg(@RequestParam("word") String word) {
+    public Optional<List<GutendexBookDto>> searchBooksFromStemAndGutenberg(@RequestParam("word") String word) {
         List<Stem> stems = stemRepository.findAll();
         Map<String, Object> stemResult = scoringService.getStemFromSearch(stems, word, 1).getFirst();
 
@@ -66,9 +66,9 @@ public class SearchController {
 
         String booksIds = books.stream()
                 .map(Book::getTitre)
-                .map(titre -> titre.endsWith(".txt")
-                        ? titre.substring(0, titre.length() - 4)
-                        : titre)
+                .map(titre -> titre.endsWith("-0.txt")
+                        ? titre.substring(0, titre.length() - 6)
+                        : titre.substring(0, titre.length() - 4))
                 .collect(Collectors.joining(","));
 
         return gutendexService.getBooksMetadataFromIds(booksIds);
