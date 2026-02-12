@@ -28,7 +28,7 @@ Il est également requis d'avoir les technologies utilisées d'installées (SDK 
 
 Pour lancer le projet, il faut :
 
-- Démarrer MariaDB d'après la config d'`application.properties` suivante ou de les modifier directement :
+- démarrer MariaDB d'après la config d'`application.properties` suivante ou de les modifier directement :
 
 ```
 spring.datasource.url=jdbc:mariadb://localhost:3306/gutenberg
